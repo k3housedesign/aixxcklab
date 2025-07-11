@@ -26,14 +26,17 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true)
   const [currentRoom, setCurrentRoom] = useState('general')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showNewRoomForm, setShowNewRoomForm] = useState(false)
+  const [newRoomName, setNewRoomName] = useState('')
+  const [newRoomDescription, setNewRoomDescription] = useState('')
 
-  const chatRooms = [
+  const [chatRooms, setChatRooms] = useState([
     { id: 'general', name: '全体チャット', description: 'AIについて自由に話しましょう' },
     { id: 'chatgpt', name: 'ChatGPT', description: 'ChatGPTについての議論' },
     { id: 'claude', name: 'Claude', description: 'Claudeについての議論' },
     { id: 'midjourney', name: 'Midjourney', description: '画像生成AIについて' },
     { id: 'news', name: 'AI最新情報', description: '最新のAIニュースを共有' }
-  ]
+  ])
 
   const ensureProfile = async (userId: string) => {
     try {
@@ -193,6 +196,23 @@ export default function ChatPage() {
     return date.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })
   }
 
+  const createNewRoom = () => {
+    if (!newRoomName.trim()) return
+
+    const roomId = newRoomName.toLowerCase().replace(/\s+/g, '-')
+    const newRoom = {
+      id: roomId,
+      name: newRoomName.trim(),
+      description: newRoomDescription.trim() || '新しいチャットルーム'
+    }
+
+    setChatRooms(prev => [...prev, newRoom])
+    setNewRoomName('')
+    setNewRoomDescription('')
+    setShowNewRoomForm(false)
+    changeRoom(roomId)
+  }
+
   if (!user) {
     return null
   }
@@ -222,6 +242,54 @@ export default function ChatPage() {
               <div className="text-xs text-gray-600">{room.description}</div>
             </button>
           ))}
+          
+          {/* 新規ルーム作成ボタン */}
+          <button
+            onClick={() => setShowNewRoomForm(true)}
+            className="w-full text-left p-3 rounded-md mb-1 transition hover:bg-gray-100 border-2 border-dashed border-gray-300 mt-2"
+          >
+            <div className="font-medium text-gray-600">+ 新しいルームを作成</div>
+          </button>
+
+          {/* 新規ルーム作成フォーム */}
+          {showNewRoomForm && (
+            <div className="p-3 bg-gray-50 rounded-md mt-2">
+              <input
+                type="text"
+                value={newRoomName}
+                onChange={(e) => setNewRoomName(e.target.value)}
+                placeholder="ルーム名"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
+                autoFocus
+              />
+              <input
+                type="text"
+                value={newRoomDescription}
+                onChange={(e) => setNewRoomDescription(e.target.value)}
+                placeholder="説明（任意）"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={createNewRoom}
+                  disabled={!newRoomName.trim()}
+                  className="flex-1 bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  作成
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNewRoomForm(false)
+                    setNewRoomName('')
+                    setNewRoomDescription('')
+                  }}
+                  className="flex-1 bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
