@@ -6,7 +6,12 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
 
-export default function EditServicePage({ params }: { params: { id: string } }) {
+export default async function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  return <EditServiceClient id={id} />
+}
+
+function EditServiceClient({ id }: { id: string }) {
   const router = useRouter()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
@@ -35,14 +40,14 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     fetchService()
-  }, [params.id])
+  }, [id])
 
   const fetchService = async () => {
     try {
       const { data, error } = await supabase
         .from('ai_services')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (error) throw error
@@ -78,7 +83,7 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
       const { error } = await supabase
         .from('ai_services')
         .delete()
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
       
@@ -119,7 +124,7 @@ export default function EditServicePage({ params }: { params: { id: string } }) 
           features: features,
           pricing: pricing
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 

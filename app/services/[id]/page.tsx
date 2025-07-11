@@ -28,7 +28,12 @@ type Review = {
   }
 }
 
-export default function ServiceDetailPage({ params }: { params: { id: string } }) {
+export default async function ServiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  return <ServiceDetailClient id={id} />
+}
+
+function ServiceDetailClient({ id }: { id: string }) {
   const router = useRouter()
   const { user } = useAuth()
   const [service, setService] = useState<AIService | null>(null)
@@ -47,7 +52,7 @@ export default function ServiceDetailPage({ params }: { params: { id: string } }
     if (user) {
       checkFavorite()
     }
-  }, [params.id, user])
+  }, [id, user])
 
   const fetchServiceAndReviews = async () => {
     try {
@@ -55,7 +60,7 @@ export default function ServiceDetailPage({ params }: { params: { id: string } }
       const { data: serviceData, error: serviceError } = await supabase
         .from('ai_services')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (serviceError) throw serviceError
@@ -68,7 +73,7 @@ export default function ServiceDetailPage({ params }: { params: { id: string } }
           *,
           profiles (username)
         `)
-        .eq('service_id', params.id)
+        .eq('service_id', id)
         .order('created_at', { ascending: false })
 
       if (reviewsError) throw reviewsError
@@ -106,13 +111,13 @@ export default function ServiceDetailPage({ params }: { params: { id: string } }
           .from('favorites')
           .delete()
           .eq('user_id', user.id)
-          .eq('service_id', params.id)
+          .eq('service_id', id)
       } else {
         await supabase
           .from('favorites')
           .insert({
             user_id: user.id,
-            service_id: params.id
+            service_id: id
           })
       }
       setIsFavorite(!isFavorite)
@@ -134,7 +139,7 @@ export default function ServiceDetailPage({ params }: { params: { id: string } }
         .from('reviews')
         .upsert({
           user_id: user.id,
-          service_id: params.id,
+          service_id: id,
           rating: reviewForm.rating,
           comment: reviewForm.comment
         })
