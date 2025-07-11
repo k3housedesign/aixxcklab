@@ -48,6 +48,7 @@ export default function ServicesPage() {
       '音楽生成': 'bg-pink-100 text-pink-800',
       'コード生成': 'bg-orange-100 text-orange-800',
       'Webアプリ開発': 'bg-indigo-100 text-indigo-800',
+      '文書解析・要約': 'bg-yellow-100 text-yellow-800',
       'その他': 'bg-gray-100 text-gray-800',
     }
     return colors[category] || colors['その他']

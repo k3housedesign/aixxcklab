@@ -31,6 +31,7 @@ export default function NewServicePage() {
     '音楽生成',
     'コード生成',
     'Webアプリ開発',
+    '文書解析・要約',
     'その他'
   ]
 
