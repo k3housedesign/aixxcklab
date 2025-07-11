@@ -93,7 +93,7 @@ function ServiceDetailClient({ id }: { id: string }) {
       .from('favorites')
       .select('id')
       .eq('user_id', user.id)
-      .eq('service_id', params.id)
+      .eq('service_id', id)
       .single()
 
     setIsFavorite(!!data)
