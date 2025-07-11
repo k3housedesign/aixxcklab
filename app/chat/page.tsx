@@ -252,75 +252,78 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* サイドバー */}
-      <div className="w-64 bg-white shadow-md">
+      <div className="w-full md:w-64 bg-white shadow-md md:shadow-md border-b md:border-b-0 md:border-r">
         <div className="p-4 border-b">
           <Link href="/" className="text-indigo-600 hover:text-indigo-800 text-sm">
             ← ホームに戻る
           </Link>
           <h2 className="text-xl font-bold mt-2">チャットルーム</h2>
         </div>
-        <div className="p-2">
+        <div className="p-2 flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible">
           {chatRooms.map((room) => (
             <button
               key={room.id}
               onClick={() => changeRoom(room.id)}
-              className={`w-full text-left p-3 rounded-md mb-1 transition ${
+              className={`flex-shrink-0 md:w-full text-left p-3 rounded-md transition ${
                 currentRoom === room.id
                   ? 'bg-indigo-100 text-indigo-700'
                   : 'hover:bg-gray-100'
-              }`}
+              } min-w-[120px] md:min-w-0`}
             >
-              <div className="font-medium">{room.name}</div>
-              <div className="text-xs text-gray-600">{room.description}</div>
+              <div className="font-medium text-sm md:text-base">{room.name}</div>
+              <div className="text-xs text-gray-600 hidden md:block">{room.description}</div>
             </button>
           ))}
           
           {/* 新規ルーム作成ボタン */}
           <button
             onClick={() => setShowNewRoomForm(true)}
-            className="w-full text-left p-3 rounded-md mb-1 transition hover:bg-gray-100 border-2 border-dashed border-gray-300 mt-2"
+            className="flex-shrink-0 md:w-full text-left p-3 rounded-md transition hover:bg-gray-100 border-2 border-dashed border-gray-300 min-w-[120px] md:min-w-0"
           >
-            <div className="font-medium text-gray-600">+ 新しいルームを作成</div>
+            <div className="font-medium text-gray-600 text-sm md:text-base">+ 新規作成</div>
           </button>
 
           {/* 新規ルーム作成フォーム */}
           {showNewRoomForm && (
-            <div className="p-3 bg-gray-50 rounded-md mt-2">
-              <input
-                type="text"
-                value={newRoomName}
-                onChange={(e) => setNewRoomName(e.target.value)}
-                placeholder="ルーム名"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
-                autoFocus
-              />
-              <input
-                type="text"
-                value={newRoomDescription}
-                onChange={(e) => setNewRoomDescription(e.target.value)}
-                placeholder="説明（任意）"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={createNewRoom}
-                  disabled={!newRoomName.trim()}
-                  className="flex-1 bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  作成
-                </button>
-                <button
-                  onClick={() => {
-                    setShowNewRoomForm(false)
-                    setNewRoomName('')
-                    setNewRoomDescription('')
-                  }}
-                  className="flex-1 bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400"
-                >
-                  キャンセル
-                </button>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 md:relative md:bg-transparent md:p-3 md:bg-gray-50 md:rounded-md md:mt-2">
+              <div className="bg-white rounded-lg p-4 w-full max-w-sm md:bg-transparent md:rounded-md md:p-0 md:max-w-none">
+                <h3 className="font-bold mb-3 md:hidden">新しいルーム作成</h3>
+                <input
+                  type="text"
+                  value={newRoomName}
+                  onChange={(e) => setNewRoomName(e.target.value)}
+                  placeholder="ルーム名"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
+                  autoFocus
+                />
+                <input
+                  type="text"
+                  value={newRoomDescription}
+                  onChange={(e) => setNewRoomDescription(e.target.value)}
+                  placeholder="説明（任意）"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2 text-sm"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={createNewRoom}
+                    disabled={!newRoomName.trim()}
+                    className="flex-1 bg-indigo-600 text-white px-3 py-2 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    作成
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewRoomForm(false)
+                      setNewRoomName('')
+                      setNewRoomDescription('')
+                    }}
+                    className="flex-1 bg-gray-300 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-400"
+                  >
+                    キャンセル
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -328,29 +331,29 @@ export default function ChatPage() {
       </div>
 
       {/* メインチャットエリア */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* ヘッダー */}
-        <div className="bg-white shadow-sm px-6 py-4">
-          <h1 className="text-2xl font-bold">
+        <div className="bg-white shadow-sm px-4 md:px-6 py-3 md:py-4">
+          <h1 className="text-lg md:text-2xl font-bold">
             {chatRooms.find(r => r.id === currentRoom)?.name}
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs md:text-sm text-gray-600 hidden md:block">
             {chatRooms.find(r => r.id === currentRoom)?.description}
           </p>
         </div>
 
         {/* メッセージエリア */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-3 md:p-6">
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
             </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 text-sm md:text-base">
               まだメッセージがありません。最初のメッセージを送信してください！
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {messages.map((message, index) => {
                 const showDate = index === 0 || 
                   formatDate(message.created_at) !== formatDate(messages[index - 1].created_at)
@@ -365,20 +368,20 @@ export default function ChatPage() {
                       </div>
                     )}
                     <div className={`flex ${message.user_id === user?.id ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      <div className={`max-w-[280px] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2 rounded-lg ${
                         message.user_id === user?.id
                           ? 'bg-indigo-600 text-white'
                           : 'bg-gray-200 text-gray-800'
                       }`}>
                         <div className="flex items-baseline gap-2 mb-1">
-                          <span className="font-medium text-sm">
+                          <span className="font-medium text-xs md:text-sm">
                             {message.profiles.username}
                           </span>
                           <span className="text-xs opacity-70">
                             {formatTime(message.created_at)}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                        <p className="whitespace-pre-wrap break-words text-sm md:text-base">{message.content}</p>
                       </div>
                     </div>
                   </div>
@@ -390,19 +393,19 @@ export default function ChatPage() {
         </div>
 
         {/* メッセージ入力フォーム */}
-        <form onSubmit={sendMessage} className="bg-white border-t p-4">
+        <form onSubmit={sendMessage} className="bg-white border-t p-3 md:p-4">
           <div className="flex gap-2">
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="メッセージを入力..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="flex-1 px-3 md:px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm md:text-base"
             />
             <button
               type="submit"
               disabled={!newMessage.trim()}
-              className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="bg-indigo-600 text-white px-4 md:px-6 py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm md:text-base"
             >
               送信
             </button>
