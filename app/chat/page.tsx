@@ -18,6 +18,14 @@ type Message = {
   }
 }
 
+type ChatRoom = {
+  id: string
+  name: string
+  description: string | null
+  created_by?: string | null
+  created_at?: string
+}
+
 export default function ChatPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -30,13 +38,7 @@ export default function ChatPage() {
   const [newRoomName, setNewRoomName] = useState('')
   const [newRoomDescription, setNewRoomDescription] = useState('')
 
-  const [chatRooms, setChatRooms] = useState([
-    { id: 'general', name: '全体チャット', description: 'AIについて自由に話しましょう' },
-    { id: 'chatgpt', name: 'ChatGPT', description: 'ChatGPTについての議論' },
-    { id: 'claude', name: 'Claude', description: 'Claudeについての議論' },
-    { id: 'midjourney', name: 'Midjourney', description: '画像生成AIについて' },
-    { id: 'news', name: 'AI最新情報', description: '最新のAIニュースを共有' }
-  ])
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
 
   const ensureProfile = async (userId: string) => {
     try {
@@ -67,6 +69,9 @@ export default function ChatPage() {
       router.push('/auth')
       return
     }
+
+    // Fetch chat rooms
+    fetchChatRooms()
 
     // Ensure profile exists before fetching messages
     ensureProfile(user.id).then(() => {
@@ -110,6 +115,20 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const fetchChatRooms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('chat_rooms')
+        .select('*')
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      setChatRooms(data || [])
+    } catch (error) {
+      console.error('Error fetching chat rooms:', error)
+    }
+  }
 
   const fetchMessages = async () => {
     try {
@@ -196,21 +215,36 @@ export default function ChatPage() {
     return date.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })
   }
 
-  const createNewRoom = () => {
-    if (!newRoomName.trim()) return
+  const createNewRoom = async () => {
+    if (!newRoomName.trim() || !user) return
 
-    const roomId = newRoomName.toLowerCase().replace(/\s+/g, '-')
-    const newRoom = {
-      id: roomId,
-      name: newRoomName.trim(),
-      description: newRoomDescription.trim() || '新しいチャットルーム'
+    const roomId = newRoomName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now()
+    
+    try {
+      const { data, error } = await supabase
+        .from('chat_rooms')
+        .insert({
+          id: roomId,
+          name: newRoomName.trim(),
+          description: newRoomDescription.trim() || '新しいチャットルーム',
+          created_by: user.id
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        setChatRooms(prev => [...prev, data])
+        setNewRoomName('')
+        setNewRoomDescription('')
+        setShowNewRoomForm(false)
+        changeRoom(roomId)
+      }
+    } catch (error) {
+      console.error('Error creating room:', error)
+      alert('ルームの作成に失敗しました')
     }
-
-    setChatRooms(prev => [...prev, newRoom])
-    setNewRoomName('')
-    setNewRoomDescription('')
-    setShowNewRoomForm(false)
-    changeRoom(roomId)
   }
 
   if (!user) {
